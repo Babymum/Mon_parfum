@@ -1,8 +1,5 @@
-config/db.php
+/config/db.php
 .env
 .DS_Store
 Thumbs.db
 *.log
-parfumerie.sql
-assets/uploads/*
-!assets/uploads/.gitkeep
