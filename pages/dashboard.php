@@ -1,6 +1,9 @@
 <?php
 require_once __DIR__ . '/../config/db.php';
 requireLogin();
+// DEBUG INFO
+$debug_role = strtolower($_SESSION['user']['role'] ?? 'n/a');
+$debug_name = strtolower($_SESSION['user']['username'] ?? 'n/a');
 
 $db = getDB();
 
@@ -53,9 +56,19 @@ $parfums = $db->query("SELECT * FROM parfums ORDER BY prix DESC")->fetchAll(PDO:
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
             Dashboard
         </a></li>
+        <?php 
+        $user_role = strtolower($_SESSION['user']['role'] ?? '');
+        $user_name = strtolower($_SESSION['user']['username'] ?? '');
+        if ($user_role === 'admin' || $user_name === 'admin'): 
+        ?>
+        <li><a href="<?= BASE_URL ?>pages/add_product.php">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Ajouter
+        </a></li>
+        <?php endif; ?>
     </ul>
     <div class="navbar-user">
-        <span class="user-badge"><?= htmlspecialchars($_SESSION['user']['username']) ?></span>
+        <span class="user-badge"><?= htmlspecialchars($_SESSION['user']['username']) ?> (<?= $_SESSION['user']['role'] ?? 'SANS RÔLE' ?>)</span>
         <a href="<?= BASE_URL ?>auth/logout.php" class="btn-logout">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>
@@ -70,13 +83,21 @@ $parfums = $db->query("SELECT * FROM parfums ORDER BY prix DESC")->fetchAll(PDO:
     <!-- PAGE HEADER -->
     <div class="dash-header">
         <div>
-            <h1 class="page-title">Dashboard <em>Admin</em></h1>
+            <h1 class="page-title">Dashboard hhh<em>Admin</em></h1>
             <p class="page-subtitle">Bienvenue, <?= htmlspecialchars($_SESSION['user']['username']) ?> · <?= date('d F Y') ?></p>
         </div>
-        <a href="<?= BASE_URL ?>pages/catalog.php" class="btn-goto-catalog">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
-            Voir le catalogue
-        </a>
+        <div style="display: flex; gap: 1rem;">
+            <?php if (strtolower($_SESSION['user']['role'] ?? '') === 'admin' || strtolower($_SESSION['user']['username'] ?? '') === 'admin'): ?>
+            <a href="<?= BASE_URL ?>pages/add_product.php" class="btn-goto-catalog" style="background: linear-gradient(135deg, var(--gold), #a07840); color: var(--dark); border: none;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                Ajouter un produit
+            </a>
+            <?php endif; ?>
+            <a href="<?= BASE_URL ?>pages/catalog.php" class="btn-goto-catalog">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+                Voir le catalogue
+            </a>
+        </div>
     </div>
 
     <!-- STATS CARDS -->
