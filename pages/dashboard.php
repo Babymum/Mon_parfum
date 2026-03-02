@@ -1,9 +1,6 @@
 <?php
 require_once __DIR__ . '/../config/db.php';
 requireLogin();
-// DEBUG INFO
-$debug_role = strtolower($_SESSION['user']['role'] ?? 'n/a');
-$debug_name = strtolower($_SESSION['user']['username'] ?? 'n/a');
 
 $db = getDB();
 
@@ -98,7 +95,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                 (<?= $_SESSION['user']['role'] ?? 'SANS RÔLE' ?>)
             <?php endif; ?>
         </span>
-        <a href="../auth/logout.php" class="btn-logout">
+        <a href="<?= BASE_URL ?>auth/logout.php" class="btn-logout">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>
             </svg>
@@ -120,7 +117,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     <!-- PAGE HEADER -->
     <div class="dash-header">
         <div>
-            <h1 class="page-title">Dashboard<em>Admin</em></h1>
+        <div>
+            <h1 class="page-title">Dashboard <em>Admin</em></h1>
             <p class="page-subtitle">Bienvenue, <?= htmlspecialchars($_SESSION['user']['username']) ?> · <?= date('d F Y') ?></p>
         </div>
         <div style="display: flex; gap: 1rem;">
@@ -130,7 +128,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                 Ajouter un produit
             </a>
             <?php endif; ?>
-            <a href="catalog.php" class="btn-goto-catalog">
+            <a href="<?= BASE_URL ?>pages/catalog.php" class="btn-goto-catalog">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
                 Voir le catalogue
             </a>

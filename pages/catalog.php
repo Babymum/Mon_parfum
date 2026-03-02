@@ -57,7 +57,6 @@ if (!empty($cart)) {
 $cartCount = array_sum($cart);
 ?>
 <!DOCTYPE html>
-<!-- DEBUG: FILE=<?= __FILE__ ?> URI=<?= $_SERVER['REQUEST_URI'] ?> ROLE=<?= $_SESSION['user']['role'] ?? 'N/A' ?> -->
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
@@ -98,7 +97,7 @@ $cartCount = array_sum($cart);
                 (<?= $_SESSION['user']['role'] ?? 'SANS RÔLE' ?>)
             <?php endif; ?>
         </span>
-        <a href="../auth/logout.php" class="btn-logout">
+        <a href="<?= BASE_URL ?>auth/logout.php" class="btn-logout">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>
             </svg>
@@ -117,9 +116,6 @@ $cartCount = array_sum($cart);
                 <p class="page-subtitle"><?= count($parfums) ?> fragrances d'exception</p>
             </div>
             <div style="display: flex; gap: 1rem; align-items: center;">
-            <?php if (isAdmin()): ?>
-           
-            <?php endif; ?>
                 <form method="GET" class="search-form">
                 <div class="search-wrapper">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
