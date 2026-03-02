@@ -26,7 +26,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 'username' => $user['username'],
                 'role'     => $user['role'],
             ];
-            header('Location: ' . BASE_URL . 'pages/catalog.php');
+
+            if (isAdmin()) {
+                header('Location: ' . BASE_URL . 'pages/dashboard.php');
+            } else {
+                header('Location: ' . BASE_URL . 'pages/catalog.php');
+            }
             exit;
         } else {
             $error = 'Identifiant ou mot de passe incorrect.';

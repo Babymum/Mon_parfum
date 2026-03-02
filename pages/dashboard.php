@@ -28,6 +28,34 @@ if (!empty($cartItems)) {
 
 // All perfumes
 $parfums = $db->query("SELECT * FROM parfums ORDER BY prix DESC")->fetchAll(PDO::FETCH_ASSOC);
+
+// === DELETE ACTION ===
+$delete_success = $delete_error = '';
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'delete') {
+    if (!isAdmin()) {
+        $delete_error = "Action non autorisée.";
+    } else {
+        $delete_id = (int)($_POST['product_id'] ?? 0);
+        if ($delete_id > 0) {
+            try {
+                // Optional: Delete associated image file from disk
+                $stmt = $db->prepare("SELECT image FROM parfums WHERE id = ?");
+                $stmt->execute([$delete_id]);
+                $img = $stmt->fetchColumn();
+                if ($img && file_exists(__DIR__ . '/../' . $img) && strpos($img, 'uploads/') !== false) {
+                    unlink(__DIR__ . '/../' . $img);
+                }
+
+                $stmt = $db->prepare("DELETE FROM parfums WHERE id = ?");
+                $stmt->execute([$delete_id]);
+                header('Location: dashboard.php?deleted=1');
+                exit;
+            } catch (PDOException $e) {
+                $delete_error = "Erreur lors de la suppression : " . $e->getMessage();
+            }
+        }
+    }
+}
 ?>
 <!DOCTYPE html>
 <html lang="fr">
@@ -37,39 +65,40 @@ $parfums = $db->query("SELECT * FROM parfums ORDER BY prix DESC")->fetchAll(PDO:
     <title>Dashboard – La Maison des Parfums</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="<?= BASE_URL ?>assets/css/style.css">
-    <link rel="stylesheet" href="<?= BASE_URL ?>assets/css/dashboard.css">
+    <link rel="stylesheet" href="../assets/css/style.css">
+    <link rel="stylesheet" href="../assets/css/dashboard.css">
 </head>
 <body>
 
 <!-- NAVBAR -->
 <nav class="navbar">
-    <a class="navbar-brand" href="<?= BASE_URL ?>pages/catalog.php">
+    <a class="navbar-brand" href="catalog.php">
         <span>🌺</span> La Maison des Parfums
     </a>
     <ul class="navbar-nav">
-        <li><a href="<?= BASE_URL ?>pages/catalog.php">
+        <li><a href="catalog.php">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
             Catalogue
         </a></li>
-        <li><a href="<?= BASE_URL ?>pages/dashboard.php" class="active">
+        <li><a href="dashboard.php" class="active">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
             Dashboard
         </a></li>
-        <?php 
-        $user_role = strtolower($_SESSION['user']['role'] ?? '');
-        $user_name = strtolower($_SESSION['user']['username'] ?? '');
-        if ($user_role === 'admin' || $user_name === 'admin'): 
-        ?>
-        <li><a href="<?= BASE_URL ?>pages/add_product.php">
+        <?php if (isAdmin()): ?>
+        <li><a href="add_product.php">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
             Ajouter
         </a></li>
         <?php endif; ?>
     </ul>
     <div class="navbar-user">
-        <span class="user-badge"><?= htmlspecialchars($_SESSION['user']['username']) ?> (<?= $_SESSION['user']['role'] ?? 'SANS RÔLE' ?>)</span>
-        <a href="<?= BASE_URL ?>auth/logout.php" class="btn-logout">
+        <span class="user-badge">
+            <?= htmlspecialchars($_SESSION['user']['username']) ?>
+            <?php if (strtolower($_SESSION['user']['username']) !== strtolower($_SESSION['user']['role'] ?? '')): ?>
+                (<?= $_SESSION['user']['role'] ?? 'SANS RÔLE' ?>)
+            <?php endif; ?>
+        </span>
+        <a href="../auth/logout.php" class="btn-logout">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>
             </svg>
@@ -80,20 +109,28 @@ $parfums = $db->query("SELECT * FROM parfums ORDER BY prix DESC")->fetchAll(PDO:
 
 <div class="dashboard-wrap">
 
+    <?php if (isset($_GET['deleted'])): ?>
+        <div class="alert alert-success" style="margin-bottom: 1.5rem;">Produit supprimé avec succès.</div>
+    <?php endif; ?>
+
+    <?php if ($delete_error): ?>
+        <div class="alert alert-error" style="margin-bottom: 1.5rem;"><?= htmlspecialchars($delete_error) ?></div>
+    <?php endif; ?>
+
     <!-- PAGE HEADER -->
     <div class="dash-header">
         <div>
-            <h1 class="page-title">Dashboard hhh<em>Admin</em></h1>
+            <h1 class="page-title">Dashboard<em>Admin</em></h1>
             <p class="page-subtitle">Bienvenue, <?= htmlspecialchars($_SESSION['user']['username']) ?> · <?= date('d F Y') ?></p>
         </div>
         <div style="display: flex; gap: 1rem;">
-            <?php if (strtolower($_SESSION['user']['role'] ?? '') === 'admin' || strtolower($_SESSION['user']['username'] ?? '') === 'admin'): ?>
-            <a href="<?= BASE_URL ?>pages/add_product.php" class="btn-goto-catalog" style="background: linear-gradient(135deg, var(--gold), #a07840); color: var(--dark); border: none;">
+            <?php if (isAdmin()): ?>
+            <a href="add_product.php" class="btn-goto-catalog" style="background: linear-gradient(135deg, var(--gold), #a07840); color: var(--dark); border: none;">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
                 Ajouter un produit
             </a>
             <?php endif; ?>
-            <a href="<?= BASE_URL ?>pages/catalog.php" class="btn-goto-catalog">
+            <a href="catalog.php" class="btn-goto-catalog">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
                 Voir le catalogue
             </a>
@@ -189,8 +226,8 @@ $parfums = $db->query("SELECT * FROM parfums ORDER BY prix DESC")->fetchAll(PDO:
                 <?php foreach (array_slice($parfums, 0, 5) as $i => $p): ?>
                 <div class="top-item">
                     <span class="top-rank rank-<?= $i+1 ?>"><?= $i+1 ?></span>
-                    <img src="<?= htmlspecialchars($p['image']) ?>" alt=""
-                         onerror="this.src='https://images.unsplash.com/photo-1541643600914-78b084683702?w=100&q=60'">
+                    <img src="../<?= htmlspecialchars($p['image']) ?>" alt=""
+                         onerror="this.src='../assets/img.php?s=<?= urlencode($p['nom']) ?>&n=<?= urlencode($p['nom']) ?>'">
                     <div class="top-info">
                         <div class="top-name"><?= htmlspecialchars($p['nom']) ?></div>
                         <div class="top-brand"><?= htmlspecialchars($p['marque']) ?></div>
@@ -224,6 +261,9 @@ $parfums = $db->query("SELECT * FROM parfums ORDER BY prix DESC")->fetchAll(PDO:
                         <th>Stock</th>
                         <th>Valeur stock</th>
                         <th>Statut</th>
+                        <?php if (isAdmin()): ?>
+                        <th>Actions</th>
+                        <?php endif; ?>
                     </tr>
                 </thead>
                 <tbody>
@@ -234,8 +274,8 @@ $parfums = $db->query("SELECT * FROM parfums ORDER BY prix DESC")->fetchAll(PDO:
                     <tr class="<?= $inCart ? 'row-incart' : '' ?>">
                         <td class="td-num"><?= $i + 1 ?></td>
                         <td class="td-parfum">
-                            <img src="<?= htmlspecialchars($p['image']) ?>" alt=""
-                                 onerror="this.src='https://images.unsplash.com/photo-1541643600914-78b084683702?w=80&q=50'">
+                            <img src="../<?= htmlspecialchars($p['image']) ?>" alt=""
+                                 onerror="this.src='../assets/img.php?s=<?= urlencode($p['nom']) ?>&n=<?= urlencode($p['nom']) ?>'">
                             <span><?= htmlspecialchars($p['nom']) ?></span>
                         </td>
                         <td class="td-brand"><span class="brand-tag"><?= htmlspecialchars($p['marque']) ?></span></td>
@@ -253,6 +293,21 @@ $parfums = $db->query("SELECT * FROM parfums ORDER BY prix DESC")->fetchAll(PDO:
                             <span class="status-badge status-out">✗ Épuisé</span>
                             <?php endif; ?>
                         </td>
+                        <?php if (isAdmin()): ?>
+                        <td>
+                            <a href="edit_product.php?id=<?= $p['id'] ?>" class="btn-edit-small" title="Modifier">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                                <span>Modifier</span>
+                            </a>
+                            <form method="POST" style="display: inline;" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer ce parfum ? Cette action est irréversible.');">
+                                <input type="hidden" name="action" value="delete">
+                                <input type="hidden" name="product_id" value="<?= $p['id'] ?>">
+                                <button type="submit" class="btn-delete-small" title="Supprimer">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
+                                </button>
+                            </form>
+                        </td>
+                        <?php endif; ?>
                     </tr>
                     <?php endforeach; ?>
                 </tbody>

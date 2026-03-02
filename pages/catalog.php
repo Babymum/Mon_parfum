@@ -65,39 +65,40 @@ $cartCount = array_sum($cart);
     <title>Catalogue – La Maison des Parfums</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="<?= BASE_URL ?>assets/css/style.css">
-    <link rel="stylesheet" href="<?= BASE_URL ?>assets/css/catalog.css">
+    <link rel="stylesheet" href="../assets/css/style.css">
+    <link rel="stylesheet" href="../assets/css/catalog.css">
 </head>
 <body>
 
 <!-- NAVBAR -->
 <nav class="navbar">
-    <a class="navbar-brand" href="<?= BASE_URL ?>pages/catalog.php">
+    <a class="navbar-brand" href="catalog.php">
         <span>🌺</span> La Maison des Parfums
     </a>
     <ul class="navbar-nav">
-        <li><a href="<?= BASE_URL ?>pages/catalog.php" class="active">
+        <li><a href="catalog.php" class="active">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
             Catalogue
         </a></li>
-        <li><a href="<?= BASE_URL ?>pages/dashboard.php">
+        <li><a href="dashboard.php">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
             Dashboard
         </a></li>
-        <?php 
-        $user_role = strtolower($_SESSION['user']['role'] ?? '');
-        $user_name = strtolower($_SESSION['user']['username'] ?? '');
-        if ($user_role === 'admin' || $user_name === 'admin'): 
-        ?>
-        <li><a href="<?= BASE_URL ?>pages/add_product.php">
+        <?php if (isAdmin()): ?>
+        <li><a href="add_product.php">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
             Ajouter
         </a></li>
         <?php endif; ?>
     </ul>
     <div class="navbar-user">
-        <span class="user-badge"><?= htmlspecialchars($_SESSION['user']['username']) ?> (<?= $_SESSION['user']['role'] ?? 'SANS RÔLE' ?>)</span>
-        <a href="<?= BASE_URL ?>auth/logout.php" class="btn-logout">
+        <span class="user-badge">
+            <?= htmlspecialchars($_SESSION['user']['username']) ?>
+            <?php if (strtolower($_SESSION['user']['username']) !== strtolower($_SESSION['user']['role'] ?? '')): ?>
+                (<?= $_SESSION['user']['role'] ?? 'SANS RÔLE' ?>)
+            <?php endif; ?>
+        </span>
+        <a href="../auth/logout.php" class="btn-logout">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>
             </svg>
@@ -116,15 +117,8 @@ $cartCount = array_sum($cart);
                 <p class="page-subtitle"><?= count($parfums) ?> fragrances d'exception</p>
             </div>
             <div style="display: flex; gap: 1rem; align-items: center;">
-            <?php 
-            $user_role = strtolower($_SESSION['user']['role'] ?? '');
-            $user_name = strtolower($_SESSION['user']['username'] ?? '');
-            if ($user_role === 'admin' || $user_name === 'admin'): 
-            ?>
-            <a href="<?= BASE_URL ?>pages/add_product.php" class="btn-goto-catalog" style="background: linear-gradient(135deg, var(--gold), #a07840) !important; color: var(--dark) !important; border: none !important; opacity: 1 !important; visibility: visible !important; display: flex !important;">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                Ajouter un produit
-            </a>
+            <?php if (isAdmin()): ?>
+           
             <?php endif; ?>
                 <form method="GET" class="search-form">
                 <div class="search-wrapper">
@@ -133,17 +127,18 @@ $cartCount = array_sum($cart);
                     </svg>
                     <input type="text" name="q" value="<?= htmlspecialchars($search) ?>" placeholder="Rechercher un parfum…">
                     <?php if($search): ?>
-                    <a href="<?= BASE_URL ?>pages/catalog.php" class="search-clear">✕</a>
+                    <a href="catalog.php" class="search-clear">✕</a>
                     <?php endif; ?>
                 </div>
             </form>
+            </div>
         </div>
 
         <?php if (empty($parfums)): ?>
         <div class="empty-state">
             <span>🔍</span>
             <p>Aucun parfum trouvé pour « <?= htmlspecialchars($search) ?> ».</p>
-            <a href="<?= BASE_URL ?>pages/catalog.php">Voir tous les parfums</a>
+            <a href="catalog.php">Voir tous les parfums</a>
         </div>
         <?php else: ?>
         <div class="perfume-grid">
@@ -151,9 +146,9 @@ $cartCount = array_sum($cart);
             <?php $inCart = $cart[$p['id']] ?? 0; ?>
             <article class="perfume-card <?= $inCart ? 'in-cart' : '' ?>">
                 <div class="card-img-wrap">
-                    <img src="<?= htmlspecialchars($p['image']) ?>"
+                    <img src="../<?= htmlspecialchars($p['image']) ?>"
                          alt="<?= htmlspecialchars($p['nom']) ?>"
-                         onerror="this.src='https://images.unsplash.com/photo-1541643600914-78b084683702?w=400&q=80'">
+                         onerror="this.src='../assets/img.php?s=<?= urlencode($p['nom']) ?>&n=<?= urlencode($p['nom']) ?>'">
                     <?php if ($inCart): ?>
                     <span class="cart-badge"><?= $inCart ?></span>
                     <?php endif; ?>
@@ -217,9 +212,9 @@ $cartCount = array_sum($cart);
         <div class="cart-items">
             <?php foreach ($cartItems as $item): ?>
             <div class="cart-item">
-                <img src="<?= htmlspecialchars($item['image']) ?>"
+                <img src="../<?= htmlspecialchars($item['image']) ?>"
                      alt="<?= htmlspecialchars($item['nom']) ?>"
-                     onerror="this.src='https://images.unsplash.com/photo-1541643600914-78b084683702?w=200&q=60'">
+                     onerror="this.src='../assets/img.php?s=<?= urlencode($item['nom']) ?>&n=<?= urlencode($item['nom']) ?>'">
                 <div class="cart-item-info">
                     <div class="cart-item-name"><?= htmlspecialchars($item['nom']) ?></div>
                     <div class="cart-item-brand"><?= htmlspecialchars($item['marque']) ?></div>

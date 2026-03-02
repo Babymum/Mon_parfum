@@ -2,7 +2,6 @@
 require_once __DIR__ . '/../config/db.php';
 requireLogin();
 
-// Check if admin
 if (!isAdmin()) {
     header('Location: ' . BASE_URL . 'pages/catalog.php');
     exit;
@@ -10,6 +9,22 @@ if (!isAdmin()) {
 
 $db = getDB();
 $success = $error = '';
+
+$product_id = $_GET['id'] ?? null;
+if (!$product_id) {
+    header('Location: ' . BASE_URL . 'pages/dashboard.php');
+    exit;
+}
+
+// Fetch existing product
+$stmt = $db->prepare("SELECT * FROM parfums WHERE id = ?");
+$stmt->execute([$product_id]);
+$product = $stmt->fetch(PDO::FETCH_ASSOC);
+
+if (!$product) {
+    header('Location: ' . BASE_URL . 'pages/dashboard.php');
+    exit;
+}
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $nom = trim($_POST['nom'] ?? '');
@@ -19,7 +34,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $stock = (int)($_POST['stock'] ?? 0);
     
     // Handle Image Upload
-    $image_url = '';
+    $image_url = $product['image']; // Keep old image by default
     if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
         $upload_dir = __DIR__ . '/../assets/uploads/';
         if (!is_dir($upload_dir)) mkdir($upload_dir, 0755, true);
@@ -44,9 +59,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (empty($error)) {
         if ($nom && $prix > 0) {
             try {
-                $stmt = $db->prepare("INSERT INTO parfums (nom, marque, description, prix, stock, image) VALUES (?, ?, ?, ?, ?, ?)");
-                $stmt->execute([$nom, $marque, $description, $prix, $stock, $image_url]);
-                $success = "Le parfum a été ajouté avec succès !";
+                $stmt = $db->prepare("UPDATE parfums SET nom = ?, marque = ?, description = ?, prix = ?, stock = ?, image = ? WHERE id = ?");
+                $stmt->execute([$nom, $marque, $description, $prix, $stock, $image_url, $product_id]);
+                $success = "Le parfum a été modifié avec succès !";
+                // Refresh product data
+                $product['nom'] = $nom;
+                $product['marque'] = $marque;
+                $product['description'] = $description;
+                $product['prix'] = $prix;
+                $product['stock'] = $stock;
+                $product['image'] = $image_url;
             } catch (PDOException $e) {
                 $error = "Erreur base de données : " . $e->getMessage();
             }
@@ -61,7 +83,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ajouter un Produit – La Maison des Parfums</title>
+    <title>Modifier un Produit – La Maison des Parfums</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../assets/css/style.css">
@@ -83,7 +105,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
             Dashboard
         </a></li>
-        <li><a href="add_product.php" class="active">
+        <li><a href="add_product.php">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
             Ajouter
         </a></li>
@@ -102,8 +124,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <div class="container">
     <div class="admin-container">
         <div class="admin-header">
-            <h1>Nouveau <em>Parfum</em></h1>
-            <p class="text-muted">Enrichissez la collection avec une nouvelle fragrance</p>
+            <h1>Modifier <em><?= htmlspecialchars($product['nom']) ?></em></h1>
+            <p class="text-muted">Mettez à jour les informations de ce parfum d'exception</p>
         </div>
 
         <?php if ($success): ?>
@@ -118,41 +140,49 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 1.5rem;">
                 <div class="form-group">
                     <label for="nom">Nom du Parfum *</label>
-                    <input type="text" id="nom" name="nom" class="form-control" required placeholder="ex: Nuit Étoilée">
+                    <input type="text" id="nom" name="nom" class="form-control" required value="<?= htmlspecialchars($product['nom']) ?>">
                 </div>
                 <div class="form-group">
                     <label for="marque">Marque</label>
-                    <input type="text" id="marque" name="marque" class="form-control" placeholder="ex: Chanel">
+                    <input type="text" id="marque" name="marque" class="form-control" value="<?= htmlspecialchars($product['marque']) ?>">
                 </div>
             </div>
 
             <div class="form-group">
                 <label for="description">Description</label>
-                <textarea id="description" name="description" class="form-control" placeholder="Décrivez les notes de tête, de cœur et de fond..."></textarea>
+                <textarea id="description" name="description" class="form-control"><?= htmlspecialchars($product['description']) ?></textarea>
             </div>
 
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
                 <div class="form-group">
                     <label for="prix">Prix (€) *</label>
-                    <input type="number" step="0.01" id="prix" name="prix" class="form-control" required placeholder="0.00">
+                    <input type="number" step="0.01" id="prix" name="prix" class="form-control" required value="<?= $product['prix'] ?>">
                 </div>
                 <div class="form-group">
-                    <label for="stock">Stock Initial</label>
-                    <input type="number" id="stock" name="stock" class="form-control" value="10">
+                    <label for="stock">Stock</label>
+                    <input type="number" id="stock" name="stock" class="form-control" value="<?= $product['stock'] ?>">
                 </div>
             </div>
 
             <div class="form-group">
                 <label>Image du Produit</label>
+                <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem;">
+                    <img src="../<?= htmlspecialchars($product['image']) ?>" alt="" style="width: 80px; height: 80px; object-fit: cover; border-radius: 8px;"
+                         onerror="this.src='../assets/img.php?s=<?= urlencode($product['nom']) ?>&n=<?= urlencode($product['nom']) ?>'">
+                    <span class="text-muted">Image actuelle</span>
+                </div>
                 <div class="file-input-wrapper">
                     <span class="file-preview-icon">📸</span>
-                    <p id="file-name">Cliquez ou glissez une image ici</p>
+                    <p id="file-name">Cliquez ou glissez une nouvelle image pour remplacer l'actuelle</p>
                     <small class="text-muted">JPG, PNG ou WEBP (Max 2MB)</small>
                     <input type="file" name="image" accept="image/*" onchange="document.getElementById('file-name').innerText = this.files[0].name">
                 </div>
             </div>
 
-            <button type="submit" class="btn-submit">Ajouter à la Collection</button>
+            <div style="display: flex; gap: 1rem;">
+                <button type="submit" class="btn-submit">Enregistrer les Modifications</button>
+                <a href="dashboard.php" class="btn-submit" style="background: var(--text-muted); text-align: center; text-decoration: none;">Annuler</a>
+            </div>
         </form>
     </div>
 </div>

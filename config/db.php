@@ -32,7 +32,7 @@ define('DB_HOST', $_ENV['DB_HOST'] ?? 'localhost');
 define('DB_NAME', $_ENV['DB_NAME'] ?? 'parfumerie');
 define('DB_USER', $_ENV['DB_USER'] ?? 'root');
 define('DB_PASS', $_ENV['DB_PASS'] ?? '');
-define('BASE_URL', $_ENV['BASE_URL'] ?? '/Mini_projet/');
+define('BASE_URL', $_ENV['BASE_URL'] ?? '/Mon_parfum/');
 
 /**
  * Retourne une instance de connexion PDO (Singleton)

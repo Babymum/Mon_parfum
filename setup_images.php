@@ -6,10 +6,10 @@
  */
 
 $images = [
-    'chanel_n5.jpg'       => 'https://images.unsplash.com/photo-1541643600914-78b084683702?w=400&q=80',
-    'sauvage.jpg'         => 'https://images.unsplash.com/photo-1590736969955-71cc94901144?w=400&q=80',
+    'chanel_n5.jpg'       => 'https://images.pexels.com/photos/22589359/pexels-photo-22589359.jpeg',
+    'sauvage.jpg'         => 'https://images.unsplash.com/photo-1716857591457-7d7fa45199c6?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MjM1fHxzYXV2YWdlJTIwcGFyZnVtfGVufDB8fDB8fHww',
     'black_opium.jpg'     => 'https://images.unsplash.com/photo-1587017539504-67cfbddac569?w=400&q=80',
-    'acqua_di_gio.jpg'    => 'https://images.unsplash.com/photo-1607201577745-6bdf5e7bda22?w=400&q=80',
+    'acqua_di_gio.jpg'    => 'https://images.unsplash.com/photo-1717376280564-0fd179a9695a?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MXx8R2lvcmdpbyUyMEFybWFuaSUyMEFjcXVhJTIwZGklMjBHaW98ZW58MHx8MHx8fDA%3D',
     'la_vie_est_belle.jpg'=> 'https://images.unsplash.com/photo-1571781926291-c477ebfd024b?w=400&q=80',
     'bleu_de_chanel.jpg'  => 'https://images.unsplash.com/photo-1585386959984-a4155224a1ad?w=400&q=80',
     'good_girl.jpg'       => 'https://images.unsplash.com/photo-1592945403244-b3fbafd7f539?w=400&q=80',
