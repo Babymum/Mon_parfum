@@ -114,11 +114,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         <div class="alert alert-error" style="margin-bottom: 1.5rem;"><?= htmlspecialchars($delete_error) ?></div>
     <?php endif; ?>
 
-    <!-- PAGE HEADER -->
     <div class="dash-header">
         <div>
-        <div>
-            <h1 class="page-title">Dashboard <em>Admin</em></h1>
+            <h1 class="page-title">Tableau de <em>Bord</em></h1>
             <p class="page-subtitle">Bienvenue, <?= htmlspecialchars($_SESSION['user']['username']) ?> · <?= date('d F Y') ?></p>
         </div>
         <div style="display: flex; gap: 1rem;">
@@ -138,45 +136,57 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     <!-- STATS CARDS -->
     <div class="stats-grid">
         <div class="stat-card stat-gold">
-            <div class="stat-icon">🌺</div>
+            <div class="stat-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+            </div>
             <div class="stat-body">
                 <div class="stat-value"><?= $totalParfums ?></div>
-                <div class="stat-label">Parfums en catalogue</div>
+                <div class="stat-label">Fragrances</div>
             </div>
         </div>
         <div class="stat-card stat-purple">
-            <div class="stat-icon">📦</div>
+            <div class="stat-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+            </div>
             <div class="stat-body">
                 <div class="stat-value"><?= number_format((int)$totalStock, 0, ',', ' ') ?></div>
                 <div class="stat-label">Unités en stock</div>
             </div>
         </div>
         <div class="stat-card stat-emerald">
-            <div class="stat-icon">💰</div>
+            <div class="stat-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+            </div>
             <div class="stat-body">
                 <div class="stat-value"><?= number_format((float)$valeurStock, 0, ',', ' ') ?> €</div>
-                <div class="stat-label">Valeur du stock</div>
+                <div class="stat-label">Valeur totale</div>
             </div>
         </div>
         <div class="stat-card stat-blue">
-            <div class="stat-icon">🛒</div>
+            <div class="stat-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+            </div>
             <div class="stat-body">
                 <div class="stat-value"><?= $cartCount ?> art.</div>
-                <div class="stat-label">Panier actuel · <?= number_format($cartValue, 2, ',', ' ') ?> €</div>
+                <div class="stat-label">Panier actuel</div>
             </div>
         </div>
         <div class="stat-card stat-rose">
-            <div class="stat-icon">📊</div>
+            <div class="stat-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+            </div>
             <div class="stat-body">
-                <div class="stat-value"><?= number_format((float)$prixMoyen, 0, ',', ' ') ?> €</div>
+                <div class="stat-value"><?= number_format((float)$prixMoyen, 1, ',', ' ') ?> €</div>
                 <div class="stat-label">Prix moyen</div>
             </div>
         </div>
         <div class="stat-card stat-amber">
-            <div class="stat-icon">👑</div>
+            <div class="stat-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="7"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/></svg>
+            </div>
             <div class="stat-body">
                 <div class="stat-value"><?= number_format((float)$prixMax, 0, ',', ' ') ?> €</div>
-                <div class="stat-label">Parfum le plus cher</div>
+                <div class="stat-label">Vente max</div>
             </div>
         </div>
     </div>
